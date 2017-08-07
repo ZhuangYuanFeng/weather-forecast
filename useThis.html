@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>天气预报</title>
+    <link href="libs/font-awesome-4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+    <link href="https://unpkg.com/animate.css@3.5.1/animate.min.css" rel="stylesheet" type="text/css">
+    <link href="css/style.css" rel="stylesheet" type="text/css" />
+    <meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+</head>
+<body>
+<div id="box">
+    <div class="location-time">
+        <span class="fa fa-location-arrow" @click="showInput"></span>&nbsp;<span id="city">{{city_name}}</span>
+        <span id="date-position"></span>
+        <transition name="custom-classes-transition"
+                    enter-active-class="animated bounceInUp"
+                    leave-active-class="animated bounceOutDown">
+            <div class="change-city" v-show="inputBox">
+                <input type="text" v-model="city_name" id="inputName">
+                <button class="city-btn" id="changeName" @click="changeCity">切换</button>
+            </div>
+        </transition>
+    </div>
+
+    <transition name="custom-classes-transition" enter-active-class="animated fadeIn">
+        <weather-forecast v-if="weather"></weather-forecast>
+    </transition>
+
+    <transition name="custom-classes-transition" enter-active-class="animated fadeIn">
+        <air-condition v-if="air"></air-condition>
+    </transition>
+
+    <transition name="custom-classes-transition" enter-active-class="animated fadeIn">
+        <life-hander v-if="life"></life-hander>
+    </transition>
+
+    <div class="nav">
+        <div class="temper" @click="toWeather()">天气预报</div>
+        <div class="condition" @click="toAir()">空气质量</div>
+        <div class="message" @click="toLife()">生活助手</div>
+    </div>
+</div>
+
+<template id="weather-forecast">
+    <div class="weather-container">
+        <div class="temperature">
+            <div class="today-temperature">
+                <div class="now-temp">
+                    <span class="now">{{mes.now.tmp}}</span>°
+                </div>
+                <div class="today-temp">
+                    <span>最高气温：</span><span class="max-tem">{{mes.daily_forecast[0].tmp.max}}°</span>
+                    <span>最低气温：</span><span class="min-tem">{{mes.daily_forecast[0].tmp.min}}°</span>
+                </div>
+            </div>
+            <div class="weather">
+                <img :src="'imgs/'+mes.now.cond.code+'.png'" />
+                <span class="weather-cn">{{mes.now.cond.txt}}</span>
+            </div>
+        </div>
+        <div class="sun">
+            <div class="sun-rise"><img src="imgs/sun-up.png" class="sun-pic"><div class="rise-time">{{mes.daily_forecast[0].astro.sr}}</div></div>
+            <div class="sun-set"><img src="imgs/sun-down.png" class="sun-pic"><div class="set-time">{{mes.daily_forecast[0].astro.ss}}</div></div>
+        </div>
+        <div class="weather-message">
+            <div class="body-temperature">
+                <div>体感温度/℃</div>
+                <div class="fl">{{mes.now.fl}}</div>
+            </div>
+            <div class="humidity">
+                <div>相对湿度/%</div>
+                <div class="hum">{{mes.now.hum}}</div>
+            </div>
+            <div class="precipitation">
+                <div>降水量/mm</div>
+                <div class="pcpn">{{mes.now.pcpn}}</div>
+            </div>
+            <div class="air-pressure">
+                <div>气压/Pa</div>
+                <div class="pres">{{mes.now.pres}}</div>
+            </div>
+            <div class="visible">
+                <div>可见度/Km</div>
+                <div class="vis">{{mes.now.vis}}</div>
+            </div>
+        </div>
+        <div class="wind">
+            <div class="wind-deg">
+                <div>风向(°)</div>
+                <div class="deg">{{mes.now.wind.deg}}</div>
+            </div>
+            <div class="wind-direction">
+                <div>风向</div>
+                <div class="dir">{{mes.now.wind.dir}}</div>
+            </div>
+            <div class="wind-power">
+                <div>风力</div>
+                <div class="sc">{{mes.now.wind.sc}}</div>
+            </div>
+            <div class="wind-speed">
+                <div>风向(km/h)</div>
+                <div class="spd">{{mes.now.wind.spd}}</div>
+            </div>
+        </div>
+        <div class="weather-forecast">
+            <div class="first-day">
+                <div>今天</div>
+                <div class="morning"><img :src="'imgs/'+mes.daily_forecast[0].cond.code_d+'.png'"></div>
+                <div class="max-temp">{{mes.daily_forecast[0].tmp.max}}</div>
+                <div class="min-temp">{{mes.daily_forecast[0].tmp.min}}</div>
+                <div class="night"><img :src="'imgs/'+mes.daily_forecast[0].cond.code_n+'.png'"></div>
+            </div>
+            <div class="second-day">
+                <div>明天</div>
+                <div class="morning"><img :src="'imgs/'+mes.daily_forecast[1].cond.code_d+'.png'"></div>
+                <div class="max-temp">{{mes.daily_forecast[1].tmp.max}}</div>
+                <div class="min-temp">{{mes.daily_forecast[1].tmp.min}}</div>
+                <div class="night"><img :src="'imgs/'+mes.daily_forecast[1].cond.code_n+'.png'"></div>
+            </div>
+            <div class="third-day">
+                <div>后天</div>
+                <div class="morning"><img :src="'imgs/'+mes.daily_forecast[2].cond.code_d+'.png'"></div>
+                <div class="max-temp">{{mes.daily_forecast[2].tmp.max}}</div>
+                <div class="min-temp">{{mes.daily_forecast[2].tmp.min}}</div>
+                <div class="night"><img :src="'imgs/'+mes.daily_forecast[2].cond.code_n+'.png'"></div>
+            </div>
+        </div>
+    </div>
+</template>
+<template id="air-condition">
+    <div class="air-condition-container">
+        <div class="people-focus">
+            <div class="PM25">
+                <div>PM2.5</div>
+                <div class="PM25-aqi">{{mes.aqi.city.pm25}}</div>
+            </div>
+            <div class="air-quality">{{mes.aqi.city.qlty}}</div>
+        </div>
+        <div class="people-unfocus-line1">
+            <div class="aqi">aqi:&nbsp;<span class="aqi-index">{{mes.aqi.city.aqi}}</span></div>
+            <div class="co">CO:&nbsp;<span class="co-index">{{mes.aqi.city.co}}</span></div>
+            <div class="no2">NO2:&nbsp;<span class="now2-index">{{mes.aqi.city.no2}}</span></div>
+        </div>
+        <div class="people-unfocus-line2">
+            <div class="o3">O3:&nbsp;<span class="o3-index">{{mes.aqi.city.o3}}</span></div>
+            <div class="PM10">PM10:&nbsp;<span class="PM10-index">{{mes.aqi.city.pm10}}</span></div>
+            <div class="so2">SO2:&nbsp;<span class="so2-index">{{mes.aqi.city.so2}}</span></div>
+        </div>
+
+        <div class="brief-box" v-for="(item , index) in mes.suggestion">
+            <div class="pic-box">
+                <img :src="'imgs/'+index+'.png'">
+            </div>
+            <div class="brief">
+                {{item.brf}}
+            </div>
+        </div>
+
+        <div class="foot-pic">
+            <img src="imgs/yellow.png" />
+            <img src="imgs/yellow.png" />
+            <img src="imgs/yellow.png" />
+        </div>
+    </div>
+</template>
+<template id="life-hander">
+    <div class="life-suggest">
+        <div class="brief-box" v-for="(item , index) in mes.suggestion">
+            <div class="pic-txt">
+                <img :src="'imgs/'+index+'.png'">
+            </div>
+            <div class="txt">
+                {{item.txt}}
+            </div>
+        </div>
+        <div class="foot-pic">
+            <img src="imgs/yellow.png" />
+            <img src="imgs/yellow.png" />
+            <img src="imgs/yellow.png" />
+        </div>
+    </div>
+</template>
+
+<script>
+    resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize'; //横竖屏判断
+    recalc = function () {
+        var clientWidth = document.documentElement.clientWidth;
+        document.documentElement.style.fontSize = 100 * (clientWidth / 375) + 'px';
+    };
+    window.addEventListener(resizeEvt, recalc, false);
+    document.addEventListener('DOMContentLoaded', recalc, false);
+</script>
+<script src="libs/jquery-3.2.1.min.js"></script>
+<script type="text/javascript" src="libs/Vue/vue.js"></script>
+<script type="text/javascript" src="libs/vuex.js"></script>
+<script>
+    var mydate = new Date();
+    var time = document.getElementById("date-position");
+    time.innerHTML = mydate.getFullYear()+"-"+(mydate.getMonth()+1)+"-"+mydate.getDate();
+    var local = "北京";
+    url="https://free-api.heweather.com/v5/weather?city="+local+"&key=f13a4900e81247fc8992723e78b3036d";
+
+    Vue.component('weather-forecast', {
+        template:'#weather-forecast',
+        computed: {
+            mes(){
+                return forecast.state.message
+            }
+        }
+    });
+    Vue.component('air-condition', {
+        template:'#air-condition',
+        computed: {
+            mes(){
+                return forecast.state.message
+            }
+        }
+    });
+    Vue.component('life-hander', {
+        template:'#life-hander',
+        computed: {
+            mes(){
+                return forecast.state.message
+            }
+        }
+    });
+
+    const forecast = new Vuex.Store({
+        state: {
+            message: ''
+        },
+        mutations: {
+            get: function (state) {
+                $.get(url,function(dt){
+                    state.message = dt.HeWeather5[0];
+                    console.log("今日1",state.message)
+                })
+            },
+            change(state){
+                var a = document.getElementById("inputName").value;
+                local = a;
+                console.log("local",local);
+                var url="https://free-api.heweather.com/v5/weather?city="+local+"&key=f13a4900e81247fc8992723e78b3036d";
+                $.get(url,function(dt){
+                    state.message = dt.HeWeather5[0];
+                    console.log("今日2",state.message)
+                })
+            }
+        }
+    });
+
+    new Vue({
+        el: '#box',
+        data:{
+            city_name:'北京',
+            inputBox:false,
+            weather:true,
+            air:false,
+            life:false,
+            mes:[
+                    {
+                    "aqi":{
+                        "city":{
+                            "aqi":"40",
+                            "co":"0",
+                            "no2":"11",
+                            "o3":"125",
+                            "pm10":"21",
+                            "pm25":"6",
+                            "qlty":"优",
+                            "so2":"2"
+                        }
+                    },
+                    "basic":{
+                        "city":"北京",
+                        "cnty":"中国",
+                        "id":"CN101010100",
+                        "lat":"39.90498734",
+                        "lon":"116.40528870",
+                        "update":{
+                            "loc":"2017-08-06 17:50",
+                            "utc":"2017-08-06 09:50"
+                        }
+                    },
+                    "daily_forecast":[
+                        {
+                            "astro":{
+                                "mr":"18:21",
+                                "ms":"03:41",
+                                "sr":"05:19",
+                                "ss":"19:22"
+                            },
+                            "cond":{
+                                "code_d":"100",
+                                "code_n":"100",
+                                "txt_d":"晴",
+                                "txt_n":"晴"
+                            },
+                            "date":"2017-08-06",
+                            "hum":"40",
+                            "pcpn":"0.3",
+                            "pop":"29",
+                            "pres":"1000",
+                            "tmp":{
+                                "max":"34",
+                                "min":"25"
+                            },
+                            "uv":"8",
+                            "vis":"16",
+                            "wind":{
+                                "deg":"0",
+                                "dir":"无持续风向",
+                                "sc":"微风",
+                                "spd":"6"
+                            }
+                        },
+                        {
+                            "astro":{
+                                "mr":"19:03",
+                                "ms":"04:35",
+                                "sr":"05:20",
+                                "ss":"19:21"
+                            },
+                            "cond":{
+                                "code_d":"101",
+                                "code_n":"100",
+                                "txt_d":"多云",
+                                "txt_n":"晴"
+                            },
+                            "date":"2017-08-07",
+                            "hum":"30",
+                            "pcpn":"0.1",
+                            "pop":"3",
+                            "pres":"1000",
+                            "tmp":{
+                                "max":"35",
+                                "min":"24"
+                            },
+                            "uv":"9",
+                            "vis":"20",
+                            "wind":{
+                                "deg":"170",
+                                "dir":"南风",
+                                "sc":"微风",
+                                "spd":"3"
+                            }
+                        },
+                        {
+                            "astro":{
+                                "mr":"19:40",
+                                "ms":"05:33",
+                                "sr":"05:21",
+                                "ss":"19:20"
+                            },
+                            "cond":{
+                                "code_d":"101",
+                                "code_n":"104",
+                                "txt_d":"多云",
+                                "txt_n":"阴"
+                            },
+                            "date":"2017-08-08",
+                            "hum":"31",
+                            "pcpn":"1.4",
+                            "pop":"46",
+                            "pres":"998",
+                            "tmp":{
+                                "max":"33",
+                                "min":"23"
+                            },
+                            "uv":"8",
+                            "vis":"19",
+                            "wind":{
+                                "deg":"186",
+                                "dir":"南风",
+                                "sc":"微风",
+                                "spd":"3"
+                            }
+                        }
+                    ],
+                    "hourly_forecast":[
+                        {
+                            "cond":{
+                                "code":"100",
+                                "txt":"晴"
+                            },
+                            "date":"2017-08-06 19:00",
+                            "hum":"68",
+                            "pop":"0",
+                            "pres":"999",
+                            "tmp":"31",
+                            "wind":{
+                                "deg":"192",
+                                "dir":"西南风",
+                                "sc":"微风",
+                                "spd":"4"
+                            }
+                        },
+                        {
+                            "cond":{
+                                "code":"305",
+                                "txt":"小雨"
+                            },
+                            "date":"2017-08-06 22:00",
+                            "hum":"75",
+                            "pop":"0",
+                            "pres":"1000",
+                            "tmp":"29",
+                            "wind":{
+                                "deg":"317",
+                                "dir":"西北风",
+                                "sc":"微风",
+                                "spd":"8"
+                            }
+                        }
+                    ],
+                    "now":{
+                        "cond":{
+                            "code":"101",
+                            "txt":"多云"
+                        },
+                        "fl":"35",
+                        "hum":"34",
+                        "pcpn":"0",
+                        "pres":"998",
+                        "tmp":"35",
+                        "vis":"7",
+                        "wind":{
+                            "deg":"330",
+                            "dir":"西北风",
+                            "sc":"3-4",
+                            "spd":"12"
+                        }
+                    },
+                    "status":"ok",
+                    "suggestion":{
+                        "air":{
+                            "brf":"中",
+                            "txt":"气象条件对空气污染物稀释、扩散和清除无明显影响，易感人群应适当减少室外活动时间。"
+                        },
+                        "comf":{
+                            "brf":"较不舒适",
+                            "txt":"白天天气多云，同时会感到有些热，不很舒适。"
+                        },
+                        "cw":{
+                            "brf":"较适宜",
+                            "txt":"较适宜洗车，未来一天无雨，风力较小，擦洗一新的汽车至少能保持一天。"
+                        },
+                        "drsg":{
+                            "brf":"炎热",
+                            "txt":"天气炎热，建议着短衫、短裙、短裤、薄型T恤衫等清凉夏季服装。"
+                        },
+                        "flu":{
+                            "brf":"少发",
+                            "txt":"各项气象条件适宜，发生感冒机率较低。但请避免长期处于空调房间中，以防感冒。"
+                        },
+                        "sport":{
+                            "brf":"较适宜",
+                            "txt":"天气较好，较适宜进行各种运动，但因天气热，请适当减少运动时间，降低运动强度。"
+                        },
+                        "trav":{
+                            "brf":"较适宜",
+                            "txt":"天气较好，温度较高，天气较热，但有微风相伴，还是比较适宜旅游的，不过外出时要注意防暑防晒哦！"
+                        },
+                        "uv":{
+                            "brf":"中等",
+                            "txt":"属中等强度紫外线辐射天气，外出时建议涂擦SPF高于15、PA+的防晒护肤品，戴帽子、太阳镜。"
+                        }
+                    }
+                }
+            ]
+        },
+        created:function () {
+            this.change()
+        },
+        methods:{
+            change(){
+                forecast.commit('get');
+            },
+            changeCity(){
+                forecast.commit('change')
+            },
+            showInput(){
+                this.inputBox = !this.inputBox;
+            },
+            toWeather(){
+                this.weather = true;
+                this.life = false;
+                this.air = false;
+            },
+            toAir(){
+                this.weather = false;
+                this.life = false;
+                this.air = true;
+            },
+            toLife(){
+                this.weather = false;
+                this.life = true;
+                this.air = false;
+            }
+        }
+    })
+
+</script>
+</body>
+</html>

@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>天气预报</title>
+		<link href="libs/font-awesome-4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+		<link href="css/style.css" rel="stylesheet" type="text/css" />
+		<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+		<script src="libs/jquery-3.2.1.min.js"></script>
+	</head>
+	<body>
+		<div id="box">
+			<div class="location-time">
+				<span class="fa fa-location-arrow"></span>&nbsp;<span class="city">北京</span>
+				<span class="data">{{Date.date}}</span>
+			</div>
+			<div class="weather-container">
+				<div class="temperature">
+					<div class="today-temperature">
+						<div class="now-temp">
+							<span class="now">{{nowTmp.tmp}}</span>°
+						</div>
+						<div class="today-temp">
+							<span>最高气温：</span><span class="max-tem">{{firstDay_tmp.max}}°</span>
+							<span>最低气温：</span><span class="min-tem">{{firstDay_tmp.min}}°</span>
+						</div>
+					</div>
+					<div class="weather">
+						<img :src="'imgs/'+now_cond.code+'.png'" />
+						<span class="weather-cn">{{now_cond.txt}}</span>
+					</div>
+				</div>
+				<div class="sun">
+					<div class="sun-rise"><img src="imgs/sun-up.png" class="sun-pic"><div class="rise-time">{{sun.sr}}</div></div>
+					<div class="sun-set"><img src="imgs/sun-down.png" class="sun-pic"><div class="set-time">{{sun.ss}}</div></div>
+				</div>
+				<div class="weather-message">
+					<div class="body-temperature">
+						<div>体感温度/℃</div>
+						<div class="fl">{{nowTmp.fl}}</div>
+					</div>
+					<div class="humidity">
+						<div>相对湿度/%</div>
+						<div class="hum">{{nowTmp.hum}}</div>
+					</div>
+					<div class="precipitation">
+						<div>降水量/mm</div>
+						<div class="pcpn">{{nowTmp.pcpn}}</div>
+					</div>
+					<div class="air-pressure">
+						<div>气压/Pa</div>
+						<div class="pres">{{nowTmp.pres}}</div>
+					</div>
+					<div class="visible">
+						<div>可见度/Km</div>
+						<div class="vis">{{nowTmp.vis}}</div>
+					</div>
+				</div>
+				<div class="wind">
+					<div class="wind-deg">
+						<div>风向(°)</div>
+						<div class="deg">{{wind.deg}}</div>
+					</div>
+					<div class="wind-direction">
+						<div>风向</div>
+						<div class="dir">{{wind.dir}}</div>
+					</div>
+					<div class="wind-power">
+						<div>风力</div>
+						<div class="sc">{{wind.sc}}</div>
+					</div>
+					<div class="wind-speed">
+						<div>风向(km/h)</div>
+						<div class="spd">{{wind.spd}}</div>
+					</div>
+				</div>
+				<div class="weather-forecast">
+					<div class="first-day">
+						<div>今天</div>
+						<div class="morning"><img :src="'imgs/'+firstDay_code.code_d+'.png'"></div>
+						<div class="max-temp">{{firstDay_tmp.max}}</div>
+						<div class="min-temp">{{firstDay_tmp.min}}</div>
+						<div class="night"><img :src="'imgs/'+firstDay_code.code_n+'.png'"></div>
+					</div>
+					<div class="second-day">
+						<div>明天</div>
+						<div class="morning"><img :src="'imgs/'+secondDay_code.code_d+'.png'"></div>
+						<div class="max-temp">{{secondDay_tmp.max}}</div>
+						<div class="min-temp">{{secondDay_tmp.min}}</div>
+						<div class="night"><img :src="'imgs/'+secondDay_code.code_n+'.png'"></div>
+					</div>
+					<div class="third-day">
+						<div>后天</div>
+						<div class="morning"><img :src="'imgs/'+thirdDay_code.code_d+'.png'"></div>
+						<div class="max-temp">{{thirdDay_tmp.max}}</div>
+						<div class="min-temp">{{thirdDay_tmp.min}}</div>
+						<div class="night"><img :src="'imgs/'+thirdDay_code.code_n+'.png'"></div>
+					</div>
+				</div>
+			</div>
+			<div class="air-condition-container">
+				<div class="people-focus">
+					<div class="PM25">
+						<div>PM2.5</div>
+						<div class="PM25-aqi">{{aqi.pm25}}</div>
+					</div>
+					<div class="air-quality">{{aqi.qlty}}</div>
+				</div>
+				<div class="people-unfocus-line1">
+					<div class="aqi">aqi:&nbsp;<span class="aqi-index">{{aqi.aqi}}</span></div>
+					<div class="co">CO:&nbsp;<span class="co-index">{{aqi.co}}</span></div>
+					<div class="no2">NO2:&nbsp;<span class="now2-index">{{aqi.no2}}</span></div>
+				</div>
+				<div class="people-unfocus-line2">
+					<div class="o3">O3:&nbsp;<span class="o3-index">{{aqi.o3}}</span></div>
+					<div class="PM10">PM10:&nbsp;<span class="PM10-index">{{aqi.pm10}}</span></div>
+					<div class="so2">SO2:&nbsp;<span class="so2-index">{{aqi.so2}}</span></div>
+				</div>
+
+				<div class="brief-box" v-for="(item , index) in sug">
+					<div class="pic-box">
+						<img :src="'imgs/'+index+'.png'">
+					</div>
+					<div class="brief">
+						{{item.brf}}
+					</div>
+				</div>
+				<div class="foot-pic">
+					<img src="imgs/yellow.png" />
+					<img src="imgs/yellow.png" />
+					<img src="imgs/yellow.png" />
+				</div>
+			</div>
+			<div class="life-suggest">
+				<div class="brief-box" v-for="(item , index) in sug">
+					<div class="pic-txt">
+						<img :src="'imgs/'+index+'.png'">
+					</div>
+					<div class="txt">
+						{{item.txt}}
+					</div>
+				</div>
+				<div class="foot-pic">
+					<img src="imgs/yellow.png" />
+					<img src="imgs/yellow.png" />
+					<img src="imgs/yellow.png" />
+				</div>
+			</div>
+			<div class="nav">
+				<div class="temper">天气预报</div>
+				<div class="condition">空气质量</div>
+				<div class="message">生活助手</div>
+			</div>
+		</div>
+<script>
+    resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize'; //横竖屏判断
+    recalc = function () {
+        var clientWidth = document.documentElement.clientWidth;
+        document.documentElement.style.fontSize = 100 * (clientWidth / 375) + 'px';
+    };
+    window.addEventListener(resizeEvt, recalc, false);
+    document.addEventListener('DOMContentLoaded', recalc, false);
+</script>
+<script type="text/javascript" src="libs/Vue/vue.js"></script>
+<script type="text/javascript" src="libs/vuex.js"></script>
+		<script>
+            const localDate = new Vuex.Store({
+                state: {
+                    message: ''
+                },
+                mutations: {
+                    get: function (state) {
+                        var url="https://free-api.heweather.com/v5/weather?city=beijing&key=f13a4900e81247fc8992723e78b3036d";
+                        $.get(url,function(dt){
+                            state.message = dt.HeWeather5[0].daily_forecast[0];
+                            console.log("今日日期",state.message)
+                        })
+                    }
+                }
+            });
+
+            const nowTmp = new Vuex.Store({
+                state: {
+                    nowtmp: '',
+                    now_cond:''
+                },
+                mutations: {
+                    getTmp: function (state) {
+                        var url="https://free-api.heweather.com/v5/weather?city=beijing&key=f13a4900e81247fc8992723e78b3036d";
+                        $.get(url,function(dt){
+                            state.nowtmp = dt.HeWeather5[0].now;
+                            state.now_cond = dt.HeWeather5[0].now.cond;
+                            console.log("现在气温",state.nowtmp);
+                            console.log("图片",state.now_cond);
+                        })
+                    }
+                }
+            });
+
+            const today_sun = new Vuex.Store({
+                state: {
+                    sun:''
+                },
+                mutations: {
+                    sunRise: function (state) {
+                        var url="https://free-api.heweather.com/v5/weather?city=beijing&key=f13a4900e81247fc8992723e78b3036d";
+                        $.get(url,function(dt){
+                            state.sun = dt.HeWeather5[0].daily_forecast[0].astro;
+                        })
+                    }
+                }
+            });
+
+            const today_wind = new Vuex.Store({
+                state: {
+                    wind:''
+                },
+                mutations: {
+                    windCond: function (state) {
+                        var url="https://free-api.heweather.com/v5/weather?city=beijing&key=f13a4900e81247fc8992723e78b3036d";
+                        $.get(url,function(dt){
+                            state.wind = dt.HeWeather5[0].now.wind;
+                            console.log("wind",state.wind)
+                        })
+                    }
+                }
+            });
+
+            const forecast = new Vuex.Store({
+                state: {
+                    firstDay_tmp:'',
+                    firstDay_code:'',
+                    secondDay_tmp:'',
+                    secondDay_code:'',
+                    thirdDay_tmp:'',
+                    thirdDay_code:''
+                },
+                mutations: {
+                    dailyWeather: function (state) {
+                        var url="https://free-api.heweather.com/v5/weather?city=beijing&key=f13a4900e81247fc8992723e78b3036d";
+                        $.get(url,function(dt){
+                            state.firstDay_tmp = dt.HeWeather5[0].daily_forecast[0].tmp;
+                            state.firstDay_code = dt.HeWeather5[0].daily_forecast[0].cond;
+                            state.secondDay_tmp = dt.HeWeather5[0].daily_forecast[1].tmp;
+                            state.secondDay_code = dt.HeWeather5[0].daily_forecast[1].cond;
+                            state.thirdDay_tmp = dt.HeWeather5[0].daily_forecast[0].tmp;
+                            state.thirdDay_code = dt.HeWeather5[0].daily_forecast[0].cond;
+                        })
+                    }
+                }
+            });
+
+            const air_aqi = new Vuex.Store({
+                state: {
+                    aqi:''
+                },
+                mutations: {
+                    airAqi: function (state) {
+                        var url="https://free-api.heweather.com/v5/weather?city=beijing&key=f13a4900e81247fc8992723e78b3036d";
+                        $.get(url,function(dt){
+                            state.aqi = dt.HeWeather5[0].aqi.city
+                        })
+                    }
+                }
+            });
+
+            const life_suggestion = new Vuex.Store({
+                state: {
+                    suggest:''
+                },
+                mutations: {
+                    suggest: function (state) {
+                        var url="https://free-api.heweather.com/v5/weather?city=beijing&key=f13a4900e81247fc8992723e78b3036d";
+                        $.get(url,function(dt){
+                            state.suggest = dt.HeWeather5[0].suggestion
+							console.log("txt",state.suggest)
+                        })
+                    }
+                }
+            });
+
+
+
+            new Vue({
+                el: '#box',
+				date:{
+
+				},
+                computed: {
+                    Date () {
+                        return localDate.state.message
+                    },
+					nowTmp (){
+                        return nowTmp.state.nowtmp
+					},
+                    now_cond (){
+                        return nowTmp.state.now_cond
+					},
+                    sun (){
+                        return today_sun.state.sun
+                    },
+					wind (){
+                        return today_wind.state.wind
+					},
+                    firstDay_tmp (){
+                        return forecast.state.firstDay_tmp
+					},
+                    firstDay_code (){
+                        return forecast.state.firstDay_code
+                    },
+                    secondDay_tmp (){
+                        return forecast.state.secondDay_tmp
+                    },
+                    secondDay_code (){
+                        return forecast.state.secondDay_code
+                    },
+                    thirdDay_tmp (){
+                        return forecast.state.thirdDay_tmp
+                    },
+                    thirdDay_code (){
+                        return forecast.state.thirdDay_code
+                    },
+                    aqi(){
+                        return air_aqi.state.aqi
+					},
+                    sug(){
+                        return life_suggestion.state.suggest
+                    }
+                },
+                methods: {
+                    date () {
+                        localDate.commit('get')
+                    },
+                    nowtmp () {
+                        nowTmp.commit('getTmp')
+                    },
+					sunRise (){
+                        today_sun.commit('sunRise')
+					},
+                    windCond (){
+                        today_wind.commit('windCond')
+                    },
+                    dailyWeather (){
+                        forecast.commit('dailyWeather')
+					},
+					airAqi (){
+                        air_aqi.commit('airAqi')
+					},
+                    suggest (){
+                        life_suggestion.commit('suggest')
+					},
+
+                },
+                mounted:function () {
+                    this.date();
+                    this.nowtmp();
+                    this.sunRise();
+                    this.windCond();
+                    this.dailyWeather();
+                    this.airAqi();
+                    this.suggest();
+                }
+            })
+
+		</script>
+	</body>
+</html>

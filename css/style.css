@@ -1,0 +1,234 @@
+*{
+	padding: 0;
+	margin: 0;
+}
+html{
+	font-size: 100px;
+}
+.weather-container{
+	width: 3.75rem;
+	font-size: 0.2rem;
+}
+.location-time{
+	width: 3.75rem;
+	background-color: #ffffff;
+	padding-top: 0.1rem;
+	font-size: 0.2rem;
+	position: fixed;
+	top: 0;
+}
+.fa-location-arrow{
+	margin-left: 0.05rem;
+}
+#date-position{
+	position: absolute;
+	left: 2.6rem;
+}
+#inputName {
+	width: 1.6rem;
+	height: 0.2rem;
+	margin-left: 0.2rem;
+	border-radius: 0.03rem;
+	border: 0.01rem solid #318bb8;
+	font-size: 0.1rem;
+}
+.city-btn{
+	border: 0.01rem solid #318bb8;
+	display: inline-block;
+	width: 0.5rem;
+	height: 0.2rem;
+	font-size: 0.1rem;
+	background-color: #318bb8;
+	border-radius: 0.02rem;
+	color: #ffffff;
+}
+.temperature{
+	display: flex;
+	flex-direction: row;
+	justify-content: space-around;
+	margin-top: 0.5rem;
+}
+.now-temp{
+	font-size: 1rem;
+	padding-left: 0.1rem;
+}
+.today-temp{
+	font-size: 0.1rem;
+}
+.weather{
+	width: 1rem;
+	font-size: 0.2rem;
+	text-align: center;
+}
+.weather > img{
+	display: block;
+	width: 1rem;
+	height: 1rem;
+}
+.sun{
+	display: flex;
+	flex-direction: row;
+	justify-content: space-around;
+	margin-top: 0.3rem;
+}
+.sun-pic{
+	width: 0.5rem;
+}
+.weather-message{
+	font-size: 0.15rem;
+	text-align: center;
+	margin-top: 0.1rem;
+}
+.body-temperature , .humidity , .precipitation , .air-pressure , .visible {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-around;
+/*	background-color: #e3e3e3;*/
+    height: 0.4rem;
+    line-height: 0.4rem;
+}
+.wind{
+	display: flex;
+	flex-direction: row;
+	justify-content: space-around;
+	text-align: center;
+	font-size: 0.17rem;
+	margin-top:0.15rem ;
+}
+.deg , .dir , .sc , .spd{
+	font-size: 0.15rem;
+	margin-top: 0.5rem;
+}
+.morning , .night{
+	width: 0.5rem;
+	height: 0.5rem;
+}
+.morning > img , .night > img{
+	display: block;
+	width: 100%;
+	height: 100%;
+}
+.weather-forecast{
+	display: flex;
+	flex-direction: row;
+	justify-content: space-around;
+	text-align: center;
+	margin-top: 0.5rem;
+	margin-bottom: 0.7rem;
+}
+.max-temp{
+	margin-bottom: 0.4rem;
+}
+.nav{
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	text-align: center;
+	position: fixed;
+	bottom: 0;
+	font-size: 0.2rem;
+}
+.nav > div{
+	width: 1.25rem;
+	height: 0.5rem;
+	background-color: #2AABD2;
+	line-height: 0.5rem;
+	/*position: absolute;*/
+}
+.air-condition-container{
+	width: 3.75rem;
+	font-size: 0.2rem;
+	margin-top: 0.5rem;
+}
+.people-focus{
+	display: flex;
+	flex-direction: row;
+	font-size: 0.1rem;
+	justify-content: space-around;
+	margin-top: 0.2rem;
+	margin-bottom: 0.1rem;
+	border-bottom: 0.02rem dashed #e1e1e1;
+}
+.PM25-aqi{
+	font-size: 0.6rem;
+    margin-left: 0.3rem;
+}
+.air-quality{
+	font-size: 0.8rem;
+	color: yellowgreen;
+}
+.people-unfocus-line1{
+	display: flex;
+	flex-direction: row;
+	font-size: 0.1rem;
+	justify-content: space-around;
+	/*text-align: right;*/
+}
+.people-unfocus-line2{
+	display: flex;
+	flex-direction: row;
+	font-size: 0.1rem;
+	justify-content: space-around;
+	margin-top: 0.1rem;
+	padding-bottom: 0.1rem;
+	border-bottom: 0.02rem dashed #e1e1e1;
+}
+.brief-box{
+	display: flex;
+	flex-direction: row;
+	/*font-size: 0.2rem;*/
+	justify-content: space-between;
+	border-bottom: 0.01rem dashed #E1E1E1;
+}
+.pic-box{
+	width: 0.3rem;
+	height: 0.3rem;
+	margin-top: 0.155rem;
+	margin-left: 0.5rem;
+}
+.pic-txt > img{
+	display: block;
+	width: 100%;
+
+}
+.pic-txt{
+	width: 0.3rem;
+	height: 0.3rem;
+	margin-top: 0.155rem;
+	margin-left: 0.1rem;
+}
+.pic-box > img{
+	display: block;
+	width: 100%;
+
+}
+.brief{
+	font-size: 0.1rem;
+	width: 0.8rem;
+	/* height: 0.5rem; */
+	margin-top: 0.25rem;
+}
+.txt{
+	font-size: 0.1rem;
+	width: 3rem;
+	 height: 0.5rem;
+	margin-top: 0.115rem;
+	margin-right: 0.1rem;
+}
+.foot-pic{
+	text-align: right;
+	height: 1.1rem;
+	margin-top: 0.15rem;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-around;
+	
+}
+.foot-pic > img{
+	width: 0.5rem;
+	height: 0.5rem;
+}
+.life-suggest{
+	width: 3.75rem;
+	margin-top: 0.5rem;
+}

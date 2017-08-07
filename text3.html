@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>天气预报</title>
+    <link href="libs/font-awesome-4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+    <link href="css/style.css" rel="stylesheet" type="text/css" />
+    <meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <script src="libs/jquery-3.2.1.min.js"></script>
+</head>
+<body>
+<div id="box">
+    <tody-date></tody-date>
+    <weather-forecast></weather-forecast>
+    <air-condition></air-condition>
+    <life-hand></life-hand>
+    <div class="nav">
+        <div class="temper">天气预报</div>
+        <div class="condition">空气质量</div>
+        <div class="message">生活助手</div>
+    </div>
+</div>
+<script>
+    resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize'; //横竖屏判断
+    recalc = function () {
+        var clientWidth = document.documentElement.clientWidth;
+        document.documentElement.style.fontSize = 100 * (clientWidth / 375) + 'px';
+    };
+    window.addEventListener(resizeEvt, recalc, false);
+    document.addEventListener('DOMContentLoaded', recalc, false);
+</script>
+
+<script type="text/javascript" src="libs/Vue/vue.js"></script>
+<script type="text/javascript" src="libs/vuex.js"></script>
+<script>
+    Vue.component('tody-date', {
+        template:'<div class="location-time">\n' +
+        '        <span class="fa fa-location-arrow"></span>&nbsp;<span class="city">北京</span>\n' +
+        '        <span class="data">{{Date.date}}</span>\n' +
+        '    </div>',
+        computed: {
+            Date(){
+                return localDate.state.message
+            }
+        },
+        methods: {
+            date () {
+                localDate.commit('get')
+            },
+        },
+        mounted:function () {
+            this.date();
+        }
+    });
+
+    Vue.component('weather-forecast',{
+        template:'<div class="weather-container">\n' +
+        '\t\t\t\t<div class="temperature">\n' +
+        '\t\t\t\t\t<div class="today-temperature">\n' +
+        '\t\t\t\t\t\t<div class="now-temp">\n' +
+        '\t\t\t\t\t\t\t<span class="now">{{nowTmp.tmp}}</span>°\n' +
+        '\t\t\t\t\t\t</div>\n' +
+        '\t\t\t\t\t\t<div class="today-temp">\n' +
+        '\t\t\t\t\t\t\t<span>最高气温：</span><span class="max-tem">{{firstDay_tmp.max}}°</span>\n' +
+        '\t\t\t\t\t\t\t<span>最低气温：</span><span class="min-tem">{{firstDay_tmp.min}}°</span>\n' +
+        '\t\t\t\t\t\t</div>\n' +
+        '\t\t\t\t\t</div>\n' +
+        '\t\t\t\t\t<div class="weather">\n' +
+        '\t\t\t\t\t\t<img :src="\'imgs/\'+now_cond.code+\'.png\'" />\n' +
+        '\t\t\t\t\t\t<span class="weather-cn">{{now_cond.txt}}</span>\n' +
+        '\t\t\t\t\t</div>\n' +
+        '\t\t\t\t</div>\n' +
+        '\t\t\t\t<div class="sun">\n' +
+        '\t\t\t\t\t<div class="sun-rise"><img src="imgs/sun-up.png" class="sun-pic"><div class="rise-time">{{sun.sr}}</div></div>\n' +
+        '\t\t\t\t\t<div class="sun-set"><img src="imgs/sun-down.png" class="sun-pic"><div class="set-time">{{sun.ss}}</div></div>\n' +
+        '\t\t\t\t</div>\n' +
+        '\t\t\t\t<div class="weather-message">\n' +
+        '\t\t\t\t\t<div class="body-temperature">\n' +
+        '\t\t\t\t\t\t<div>体感温度/℃</div>\n' +
+        '\t\t\t\t\t\t<div class="fl">{{nowTmp.fl}}</div>\n' +
+        '\t\t\t\t\t</div>\n' +
+        '\t\t\t\t\t<div class="humidity">\n' +
+        '\t\t\t\t\t\t<div>相对湿度/%</div>\n' +
+        '\t\t\t\t\t\t<div class="hum">{{nowTmp.hum}}</div>\n' +
+        '\t\t\t\t\t</div>\n' +
+        '\t\t\t\t\t<div class="precipitation">\n' +
+        '\t\t\t\t\t\t<div>降水量/mm</div>\n' +
+        '\t\t\t\t\t\t<div class="pcpn">{{nowTmp.pcpn}}</div>\n' +
+        '\t\t\t\t\t</div>\n' +
+        '\t\t\t\t\t<div class="air-pressure">\n' +
+        '\t\t\t\t\t\t<div>气压/Pa</div>\n' +
+        '\t\t\t\t\t\t<div class="pres">{{nowTmp.pres}}</div>\n' +
+        '\t\t\t\t\t</div>\n' +
+        '\t\t\t\t\t<div class="visible">\n' +
+        '\t\t\t\t\t\t<div>可见度/Km</div>\n' +
+        '\t\t\t\t\t\t<div class="vis">{{nowTmp.vis}}</div>\n' +
+        '\t\t\t\t\t</div>\n' +
+        '\t\t\t\t</div>\n' +
+        '\t\t\t\t<div class="wind">\n' +
+        '\t\t\t\t\t<div class="wind-deg">\n' +
+        '\t\t\t\t\t\t<div>风向(°)</div>\n' +
+        '\t\t\t\t\t\t<div class="deg">{{wind.deg}}</div>\n' +
+        '\t\t\t\t\t</div>\n' +
+        '\t\t\t\t\t<div class="wind-direction">\n' +
+        '\t\t\t\t\t\t<div>风向</div>\n' +
+        '\t\t\t\t\t\t<div class="dir">{{wind.dir}}</div>\n' +
+        '\t\t\t\t\t</div>\n' +
+        '\t\t\t\t\t<div class="wind-power">\n' +
+        '\t\t\t\t\t\t<div>风力</div>\n' +
+        '\t\t\t\t\t\t<div class="sc">{{wind.sc}}</div>\n' +
+        '\t\t\t\t\t</div>\n' +
+        '\t\t\t\t\t<div class="wind-speed">\n' +
+        '\t\t\t\t\t\t<div>风向(km/h)</div>\n' +
+        '\t\t\t\t\t\t<div class="spd">{{wind.spd}}</div>\n' +
+        '\t\t\t\t\t</div>\n' +
+        '\t\t\t\t</div>\n' +
+        '\t\t\t\t<div class="weather-forecast">\n' +
+        '\t\t\t\t\t<div class="first-day">\n' +
+        '\t\t\t\t\t\t<div>今天</div>\n' +
+        '\t\t\t\t\t\t<div class="morning"><img :src="\'imgs/\'+firstDay_code.code_d+\'.png\'"></div>\n' +
+        '\t\t\t\t\t\t<div class="max-temp">{{firstDay_tmp.max}}</div>\n' +
+        '\t\t\t\t\t\t<div class="min-temp">{{firstDay_tmp.min}}</div>\n' +
+        '\t\t\t\t\t\t<div class="night"><img :src="\'imgs/\'+firstDay_code.code_n+\'.png\'"></div>\n' +
+        '\t\t\t\t\t</div>\n' +
+        '\t\t\t\t\t<div class="second-day">\n' +
+        '\t\t\t\t\t\t<div>明天</div>\n' +
+        '\t\t\t\t\t\t<div class="morning"><img :src="\'imgs/\'+secondDay_code.code_d+\'.png\'"></div>\n' +
+        '\t\t\t\t\t\t<div class="max-temp">{{secondDay_tmp.max}}</div>\n' +
+        '\t\t\t\t\t\t<div class="min-temp">{{secondDay_tmp.min}}</div>\n' +
+        '\t\t\t\t\t\t<div class="night"><img :src="\'imgs/\'+secondDay_code.code_n+\'.png\'"></div>\n' +
+        '\t\t\t\t\t</div>\n' +
+        '\t\t\t\t\t<div class="third-day">\n' +
+        '\t\t\t\t\t\t<div>后天</div>\n' +
+        '\t\t\t\t\t\t<div class="morning"><img :src="\'imgs/\'+thirdDay_code.code_d+\'.png\'"></div>\n' +
+        '\t\t\t\t\t\t<div class="max-temp">{{thirdDay_tmp.max}}</div>\n' +
+        '\t\t\t\t\t\t<div class="min-temp">{{thirdDay_tmp.min}}</div>\n' +
+        '\t\t\t\t\t\t<div class="night"><img :src="\'imgs/\'+thirdDay_code.code_n+\'.png\'"></div>\n' +
+        '\t\t\t\t\t</div>\n' +
+        '\t\t\t\t</div>\n' +
+        '\t\t\t</div>',
+        computed: {
+            nowTmp (){
+                return nowTmp.state.nowtmp
+            },
+            now_cond (){
+                return nowTmp.state.now_cond
+            },
+            sun (){
+                return today_sun.state.sun
+            },
+            wind (){
+                return today_wind.state.wind
+            },
+            firstDay_tmp (){
+                return forecast.state.firstDay_tmp
+            },
+            firstDay_code (){
+                return forecast.state.firstDay_code
+            },
+            secondDay_tmp (){
+                return forecast.state.secondDay_tmp
+            },
+            secondDay_code (){
+                return forecast.state.secondDay_code
+            },
+            thirdDay_tmp (){
+                return forecast.state.thirdDay_tmp
+            },
+            thirdDay_code (){
+                return forecast.state.thirdDay_code
+            }
+        },
+        methods: {
+            date () {
+                localDate.commit('get')
+            },
+            nowtmp () {
+                nowTmp.commit('getTmp')
+            },
+            sunRise (){
+                today_sun.commit('sunRise')
+            },
+            windCond (){
+                today_wind.commit('windCond')
+            },
+            dailyWeather (){
+                forecast.commit('dailyWeather')
+            },
+            airAqi (){
+                air_aqi.commit('airAqi')
+            },
+            suggest (){
+                life_suggestion.commit('suggest')
+            },
+
+        },
+        mounted:function () {
+            this.nowtmp();
+            this.sunRise();
+            this.windCond();
+            this.dailyWeather();
+        }
+
+    });
+
+    Vue.component('air-condition',{
+        template:'<div class="air-condition-container">\n' +
+        '\t\t\t\t<div class="people-focus">\n' +
+        '\t\t\t\t\t<div class="PM25">\n' +
+        '\t\t\t\t\t\t<div>PM2.5</div>\n' +
+        '\t\t\t\t\t\t<div class="PM25-aqi">{{aqi.pm25}}</div>\n' +
+        '\t\t\t\t\t</div>\n' +
+        '\t\t\t\t\t<div class="air-quality">{{aqi.qlty}}</div>\n' +
+        '\t\t\t\t</div>\n' +
+        '\t\t\t\t<div class="people-unfocus-line1">\n' +
+        '\t\t\t\t\t<div class="aqi">aqi:&nbsp;<span class="aqi-index">{{aqi.aqi}}</span></div>\n' +
+        '\t\t\t\t\t<div class="co">CO:&nbsp;<span class="co-index">{{aqi.co}}</span></div>\n' +
+        '\t\t\t\t\t<div class="no2">NO2:&nbsp;<span class="now2-index">{{aqi.no2}}</span></div>\n' +
+        '\t\t\t\t</div>\n' +
+        '\t\t\t\t<div class="people-unfocus-line2">\n' +
+        '\t\t\t\t\t<div class="o3">O3:&nbsp;<span class="o3-index">{{aqi.o3}}</span></div>\n' +
+        '\t\t\t\t\t<div class="PM10">PM10:&nbsp;<span class="PM10-index">{{aqi.pm10}}</span></div>\n' +
+        '\t\t\t\t\t<div class="so2">SO2:&nbsp;<span class="so2-index">{{aqi.so2}}</span></div>\n' +
+        '\t\t\t\t</div>\n' +
+        '\n' +
+        '\t\t\t\t<div class="brief-box" v-for="(item , index) in sug">\n' +
+        '\t\t\t\t\t<div class="pic-box">\n' +
+        '\t\t\t\t\t\t<img :src="\'imgs/\'+index+\'.png\'">\n' +
+        '\t\t\t\t\t</div>\n' +
+        '\t\t\t\t\t<div class="brief">\n' +
+        '\t\t\t\t\t\t{{item.brf}}\n' +
+        '\t\t\t\t\t</div>\n' +
+        '\t\t\t\t</div>\n' +
+        '\t\t\t\t<div class="foot-pic">\n' +
+        '\t\t\t\t\t<img src="imgs/yellow.png" />\n' +
+        '\t\t\t\t\t<img src="imgs/yellow.png" />\n' +
+        '\t\t\t\t\t<img src="imgs/yellow.png" />\n' +
+        '\t\t\t\t</div>\n' +
+        '\t\t\t</div>',
+        computed: {
+            Date () {
+                return localDate.state.message
+            },
+            nowTmp (){
+                return nowTmp.state.nowtmp
+            },
+            now_cond (){
+                return nowTmp.state.now_cond
+            },
+            sun (){
+                return today_sun.state.sun
+            },
+            wind (){
+                return today_wind.state.wind
+            },
+            firstDay_tmp (){
+                return forecast.state.firstDay_tmp
+            },
+            firstDay_code (){
+                return forecast.state.firstDay_code
+            },
+            secondDay_tmp (){
+                return forecast.state.secondDay_tmp
+            },
+            secondDay_code (){
+                return forecast.state.secondDay_code
+            },
+            thirdDay_tmp (){
+                return forecast.state.thirdDay_tmp
+            },
+            thirdDay_code (){
+                return forecast.state.thirdDay_code
+            },
+            aqi(){
+                return air_aqi.state.aqi
+            },
+            sug(){
+                return life_suggestion.state.suggest
+            }
+        },
+        methods: {
+            airAqi (){
+                air_aqi.commit('airAqi')
+            },
+            suggest (){
+                life_suggestion.commit('suggest')
+            },
+        },
+        mounted:function () {
+            this.airAqi();
+            this.suggest();
+        }
+
+    });
+
+    Vue.component('life-hand',{
+        template:'<div class="life-suggest">\n' +
+        '\t\t\t\t<div class="brief-box" v-for="(item , index) in sug">\n' +
+        '\t\t\t\t\t<div class="pic-txt">\n' +
+        '\t\t\t\t\t\t<img :src="\'imgs/\'+index+\'.png\'">\n' +
+        '\t\t\t\t\t</div>\n' +
+        '\t\t\t\t\t<div class="txt">\n' +
+        '\t\t\t\t\t\t{{item.txt}}\n' +
+        '\t\t\t\t\t</div>\n' +
+        '\t\t\t\t</div>\n' +
+        '\t\t\t\t<div class="foot-pic">\n' +
+        '\t\t\t\t\t<img src="imgs/yellow.png" />\n' +
+        '\t\t\t\t\t<img src="imgs/yellow.png" />\n' +
+        '\t\t\t\t\t<img src="imgs/yellow.png" />\n' +
+        '\t\t\t\t</div>\n' +
+        '\t\t\t</div>',
+        computed: {
+            Date () {
+                return localDate.state.message
+            },
+            nowTmp (){
+                return nowTmp.state.nowtmp
+            },
+            now_cond (){
+                return nowTmp.state.now_cond
+            },
+            sun (){
+                return today_sun.state.sun
+            },
+            wind (){
+                return today_wind.state.wind
+            },
+            firstDay_tmp (){
+                return forecast.state.firstDay_tmp
+            },
+            firstDay_code (){
+                return forecast.state.firstDay_code
+            },
+            secondDay_tmp (){
+                return forecast.state.secondDay_tmp
+            },
+            secondDay_code (){
+                return forecast.state.secondDay_code
+            },
+            thirdDay_tmp (){
+                return forecast.state.thirdDay_tmp
+            },
+            thirdDay_code (){
+                return forecast.state.thirdDay_code
+            },
+            aqi(){
+                return air_aqi.state.aqi
+            },
+            sug(){
+                return life_suggestion.state.suggest
+            }
+        },
+        methods: {
+            airAqi (){
+                air_aqi.commit('airAqi')
+            },
+            suggest (){
+                life_suggestion.commit('suggest')
+            },
+
+        },
+        mounted:function () {
+            this.airAqi();
+            this.suggest();
+        }
+    });
+
+    var local = "北京";
+
+    var url="https://free-api.heweather.com/v5/weather?city="+local+"&key=f13a4900e81247fc8992723e78b3036d";
+
+    const localDate = new Vuex.Store({
+        state: {
+            message: ''
+        },
+        mutations: {
+            get: function (state) {
+
+                $.get(url,function(dt){
+                    state.message = dt.HeWeather5[0].daily_forecast[0];
+                    console.log("今日日期",state.message)
+                })
+            }
+        }
+    });
+
+    const nowTmp = new Vuex.Store({
+        state: {
+            nowtmp: '',
+            now_cond:''
+        },
+        mutations: {
+            getTmp: function (state) {
+                $.get(url,function(dt){
+                    state.nowtmp = dt.HeWeather5[0].now;
+                    state.now_cond = dt.HeWeather5[0].now.cond;
+                    console.log("现在气温",state.nowtmp);
+                    console.log("图片",state.now_cond);
+                })
+            }
+        }
+    });
+
+    const today_sun = new Vuex.Store({
+        state: {
+            sun:''
+        },
+        mutations: {
+            sunRise: function (state) {
+                $.get(url,function(dt){
+                    state.sun = dt.HeWeather5[0].daily_forecast[0].astro;
+                })
+            }
+        }
+    });
+
+    const today_wind = new Vuex.Store({
+        state: {
+            wind:''
+        },
+        mutations: {
+            windCond: function (state) {
+                $.get(url,function(dt){
+                    state.wind = dt.HeWeather5[0].now.wind;
+                    console.log("wind",state.wind)
+                })
+            }
+        }
+    });
+
+    const forecast = new Vuex.Store({
+        state: {
+            firstDay_tmp:'',
+            firstDay_code:'',
+            secondDay_tmp:'',
+            secondDay_code:'',
+            thirdDay_tmp:'',
+            thirdDay_code:''
+        },
+        mutations: {
+            dailyWeather: function (state) {
+                $.get(url,function(dt){
+                    state.firstDay_tmp = dt.HeWeather5[0].daily_forecast[0].tmp;
+                    state.firstDay_code = dt.HeWeather5[0].daily_forecast[0].cond;
+                    state.secondDay_tmp = dt.HeWeather5[0].daily_forecast[1].tmp;
+                    state.secondDay_code = dt.HeWeather5[0].daily_forecast[1].cond;
+                    state.thirdDay_tmp = dt.HeWeather5[0].daily_forecast[0].tmp;
+                    state.thirdDay_code = dt.HeWeather5[0].daily_forecast[0].cond;
+                })
+            }
+        }
+    });
+
+    const air_aqi = new Vuex.Store({
+        state: {
+            aqi:''
+        },
+        mutations: {
+            airAqi: function (state) {
+                $.get(url,function(dt){
+                    state.aqi = dt.HeWeather5[0].aqi.city
+                })
+            }
+        }
+    });
+
+    const life_suggestion = new Vuex.Store({
+        state: {
+            suggest:''
+        },
+        mutations: {
+            suggest: function (state) {
+                $.get(url,function(dt){
+                    state.suggest = dt.HeWeather5[0].suggestion
+                    console.log("txt",state.suggest)
+                })
+            }
+        }
+    });
+
+    new Vue({
+        el: '#box',
+        date:{
+        },
+        methods:{
+        }
+
+    })
+
+</script>
+</body>
+</html>

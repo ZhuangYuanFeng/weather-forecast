@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>天气预报</title>
+    <link href="libs/font-awesome-4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+    <link href="css/style.css" rel="stylesheet" type="text/css" />
+    <meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <script src="libs/jquery-3.2.1.min.js"></script>
+</head>
+<body>
+<div id="box">
+    <div class="location-time">
+        <span class="fa fa-location-arrow" @click="showInput()"></span>&nbsp;<span id="city">{{city_name}}</span>
+        <span id="date-position"></span>
+        <div class="change-city" v-show="inputBox">
+            <input type="text" v-model="city_name" id="inputName">
+            <button class="city-btn" id="changeName" @click="changeCity()">切换</button>
+        </div>
+    </div>
+
+    <weather-forecast v-if="weather"></weather-forecast>
+    <air-condition v-if="air"></air-condition>
+    <life-hander v-if="life"></life-hander>
+
+    <div class="nav">
+        <div class="temper" @click="toWeather()"><a>天气预报</a></div>
+        <div class="condition" @click="toAir()"><a>空气质量</a></div>
+        <div class="message" @click="toLife()"><a>生活助手</a></div>
+    </div>
+</div>
+
+<template id="weather-forecast">
+    <div class="weather-container">
+        <div class="temperature">
+            <div class="today-temperature">
+                <div class="now-temp">
+                    <span class="now">{{mes.now.tmp}}</span>°
+                </div>
+                <div class="today-temp">
+                    <span>最高气温：</span><span class="max-tem">{{mes.daily_forecast[0].tmp.max}}°</span>
+                    <span>最低气温：</span><span class="min-tem">{{mes.daily_forecast[0].tmp.min}}°</span>
+                </div>
+            </div>
+            <div class="weather">
+                <img :src="'imgs/'+mes.now.cond.code+'.png'" />
+                <span class="weather-cn">{{mes.now.cond.txt}}</span>
+            </div>
+        </div>
+        <div class="sun">
+            <div class="sun-rise"><img src="imgs/sun-up.png" class="sun-pic"><div class="rise-time">{{mes.daily_forecast[0].astro.sr}}</div></div>
+            <div class="sun-set"><img src="imgs/sun-down.png" class="sun-pic"><div class="set-time">{{mes.daily_forecast[0].astro.ss}}</div></div>
+        </div>
+        <div class="weather-message">
+            <div class="body-temperature">
+                <div>体感温度/℃</div>
+                <div class="fl">{{mes.now.fl}}</div>
+            </div>
+            <div class="humidity">
+                <div>相对湿度/%</div>
+                <div class="hum">{{mes.now.hum}}</div>
+            </div>
+            <div class="precipitation">
+                <div>降水量/mm</div>
+                <div class="pcpn">{{mes.now.pcpn}}</div>
+            </div>
+            <div class="air-pressure">
+                <div>气压/Pa</div>
+                <div class="pres">{{mes.now.pres}}</div>
+            </div>
+            <div class="visible">
+                <div>可见度/Km</div>
+                <div class="vis">{{mes.now.vis}}</div>
+            </div>
+        </div>
+        <div class="wind">
+            <div class="wind-deg">
+                <div>风向(°)</div>
+                <div class="deg">{{mes.now.wind.deg}}</div>
+            </div>
+            <div class="wind-direction">
+                <div>风向</div>
+                <div class="dir">{{mes.now.wind.dir}}</div>
+            </div>
+            <div class="wind-power">
+                <div>风力</div>
+                <div class="sc">{{mes.now.wind.sc}}</div>
+            </div>
+            <div class="wind-speed">
+                <div>风向(km/h)</div>
+                <div class="spd">{{mes.now.wind.spd}}</div>
+            </div>
+        </div>
+        <div class="weather-forecast">
+            <div class="first-day">
+                <div>今天</div>
+                <div class="morning"><img :src="'imgs/'+mes.daily_forecast[0].cond.code_d+'.png'"></div>
+                <div class="max-temp">{{mes.daily_forecast[0].tmp.max}}</div>
+                <div class="min-temp">{{mes.daily_forecast[0].tmp.min}}</div>
+                <div class="night"><img :src="'imgs/'+mes.daily_forecast[0].cond.code_n+'.png'"></div>
+            </div>
+            <div class="second-day">
+                <div>明天</div>
+                <div class="morning"><img :src="'imgs/'+mes.daily_forecast[1].cond.code_d+'.png'"></div>
+                <div class="max-temp">{{mes.daily_forecast[1].tmp.max}}</div>
+                <div class="min-temp">{{mes.daily_forecast[1].tmp.min}}</div>
+                <div class="night"><img :src="'imgs/'+mes.daily_forecast[1].cond.code_n+'.png'"></div>
+            </div>
+            <div class="third-day">
+                <div>后天</div>
+                <div class="morning"><img :src="'imgs/'+mes.daily_forecast[2].cond.code_d+'.png'"></div>
+                <div class="max-temp">{{mes.daily_forecast[2].tmp.max}}</div>
+                <div class="min-temp">{{mes.daily_forecast[2].tmp.min}}</div>
+                <div class="night"><img :src="'imgs/'+mes.daily_forecast[2].cond.code_n+'.png'"></div>
+            </div>
+        </div>
+    </div>
+</template>
+
+<template id="air-condition">
+    <div class="air-condition-container">
+        <div class="people-focus">
+            <div class="PM25">
+                <div>PM2.5</div>
+                <div class="PM25-aqi">{{mes.aqi.city.pm25}}</div>
+            </div>
+            <div class="air-quality">{{mes.aqi.city.qlty}}</div>
+        </div>
+        <div class="people-unfocus-line1">
+            <div class="aqi">aqi:&nbsp;<span class="aqi-index">{{mes.aqi.city.aqi}}</span></div>
+            <div class="co">CO:&nbsp;<span class="co-index">{{mes.aqi.city.co}}</span></div>
+            <div class="no2">NO2:&nbsp;<span class="now2-index">{{mes.aqi.city.no2}}</span></div>
+        </div>
+        <div class="people-unfocus-line2">
+            <div class="o3">O3:&nbsp;<span class="o3-index">{{mes.aqi.city.o3}}</span></div>
+            <div class="PM10">PM10:&nbsp;<span class="PM10-index">{{mes.aqi.city.pm10}}</span></div>
+            <div class="so2">SO2:&nbsp;<span class="so2-index">{{mes.aqi.city.so2}}</span></div>
+        </div>
+
+        <div class="brief-box" v-for="(item , index) in mes.suggestion">
+            <div class="pic-box">
+                <img :src="'imgs/'+index+'.png'">
+            </div>
+            <div class="brief">
+                {{item.brf}}
+            </div>
+        </div>
+
+        <div class="foot-pic">
+            <img src="imgs/yellow.png" />
+            <img src="imgs/yellow.png" />
+            <img src="imgs/yellow.png" />
+        </div>
+    </div>
+</template>
+
+<template id="life-hander">
+    <div class="life-suggest">
+        <div class="brief-box" v-for="(item , index) in mes.suggestion">
+            <div class="pic-txt">
+                <img :src="'imgs/'+index+'.png'">
+            </div>
+            <div class="txt">
+                {{item.txt}}
+            </div>
+        </div>
+        <div class="foot-pic">
+            <img src="imgs/yellow.png" />
+            <img src="imgs/yellow.png" />
+            <img src="imgs/yellow.png" />
+        </div>
+    </div>
+</template>
+
+<script>
+    resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize'; //横竖屏判断
+    recalc = function () {
+        var clientWidth = document.documentElement.clientWidth;
+        document.documentElement.style.fontSize = 100 * (clientWidth / 375) + 'px';
+    };
+    window.addEventListener(resizeEvt, recalc, false);
+    document.addEventListener('DOMContentLoaded', recalc, false);
+</script>
+
+<script type="text/javascript" src="libs/Vue/vue.js"></script>
+<script type="text/javascript" src="libs/vuex.js"></script>
+<script>
+    var mydate = new Date();
+    var time = document.getElementById("date-position");
+    time.innerHTML = mydate.getFullYear()+"-"+(mydate.getMonth()+1)+"-"+mydate.getDate();
+    var local = "北京";
+    url="https://free-api.heweather.com/v5/weather?city="+local+"&key=f13a4900e81247fc8992723e78b3036d";
+
+    Vue.component('weather-forecast', {
+        template:'#weather-forecast',
+        computed: {
+            mes(){
+                return forecast.state.message
+            }
+        },
+        methods: {
+            date () {
+                forecast.commit('get')
+            },
+        },
+        mounted:function () {
+            this.date();
+        }
+    });
+    Vue.component('air-condition', {
+        template:'#air-condition',
+        computed: {
+            mes(){
+                return forecast.state.message
+            }
+        },
+        methods: {
+            date () {
+                forecast.commit('get')
+            },
+        },
+        mounted:function () {
+            this.date();
+        }
+    });
+    Vue.component('life-hander', {
+        template:'#life-hander',
+        computed: {
+            mes(){
+                return forecast.state.message
+            }
+        },
+        methods: {
+            date () {
+                forecast.commit('get')
+            },
+        },
+        mounted:function () {
+            this.date();
+        }
+    });
+
+    const forecast = new Vuex.Store({
+        state: {
+            message: ''
+        },
+        mutations: {
+            get: function (state) {
+                $.get(url,function(dt){
+                    state.message = dt.HeWeather5[0];
+                    console.log("今日日期",state.message)
+                })
+            },
+            change(state){
+                var a = document.getElementById("inputName").value;
+                local = a;
+                console.log("local",local);
+                var url="https://free-api.heweather.com/v5/weather?city="+local+"&key=f13a4900e81247fc8992723e78b3036d";
+                $.get(url,function(dt){
+                    state.message = dt.HeWeather5[0];
+                    console.log("今日日期",state.message)
+                })
+            }
+        }
+    });
+
+    new Vue({
+        el: '#box',
+        data:{
+            city_name:'北京',
+            inputBox:false,
+            weather:true,
+            air:false,
+            life:false
+        },
+        methods:{
+            changeCity(){
+                forecast.commit('change')
+            },
+            showInput(){
+              this.inputBox = !this.inputBox;
+            },
+            toWeather(){
+                this.weather = true;
+                this.life = false;
+                this.air = false;
+            },
+            toAir(){
+                this.weather = false;
+                this.life = false;
+                this.air = true;
+            },
+            toLife(){
+                this.weather = false;
+                this.life = true;
+                this.air = false;
+            }
+        }
+    })
+
+</script>
+</body>
+</html>
